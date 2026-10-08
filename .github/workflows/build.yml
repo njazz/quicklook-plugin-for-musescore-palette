@@ -1,0 +1,38 @@
+# Builds the universal MpalFilePreview.app on every push/PR, and attaches
+# MpalFilePreview.zip to the GitHub release when you push a tag like v1.0.0.
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write # needed to attach the zip to a release
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Parser smoke test
+        run: swift run -c release mpal2html Examples/Percussion_Sticking.mpal | grep -q "Percussion Sticking"
+
+      - name: Build app (universal, ad-hoc signed)
+        run: |
+          if [[ "$GITHUB_REF_TYPE" == tag ]]; then VERSION="${GITHUB_REF_NAME#v}"; else VERSION=0.0.0; fi
+          UNIVERSAL=1 VERSION="$VERSION" ./build_app.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MpalFilePreview
+          path: dist/MpalFilePreview.zip
+
+      - name: Attach to release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/MpalFilePreview.zip
