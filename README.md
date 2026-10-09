@@ -2,6 +2,8 @@
 
 **Unofficial Quick Look plugin for MuseScore palette files (`.mpal`), for macOS.**
 
+![image](screenshot.png)
+
 Select an `.mpal` file in Finder and press Space. The preview shows the palette name, its cell count and
 grid size, and one card per cell with the symbol, the cell name and the element type.
 
